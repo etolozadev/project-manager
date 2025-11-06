@@ -13,43 +13,43 @@ import {
 import { dashboard } from '@/routes';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
-import { BookOpen, Folder, LayoutGrid } from 'lucide-react';
+import {  ChartBarIncreasingIcon, FileUserIcon, FolderKanban, ListCheckIcon, Users } from 'lucide-react';
 import AppLogo from './app-logo';
 
 const mainNavItems: NavItem[] = [
     {
         title: 'Dashboard',
         href: dashboard(),
-        icon: LayoutGrid,
+        icon: ChartBarIncreasingIcon,
     },
     {
         title: 'Cotizaciones',
         href: '/quotes',
-        icon: LayoutGrid,
+        icon: FileUserIcon,
     },
     {
         title: 'Proyectos',
         href: '/projects',
-        icon: LayoutGrid,
+        icon: FolderKanban,
     },
     {
         title: 'Tareas',
         href: '/tasks',
-        icon: LayoutGrid,
+        icon: ListCheckIcon,
+    },
+    {
+        title: 'Clientes',
+        href: '/clients',
+        icon: Users,
     }
 ];
 
 const footerNavItems: NavItem[] = [
-    {
-        title: 'Repository',
-        href: 'https://github.com/laravel/react-starter-kit',
-        icon: Folder,
-    },
-    {
-        title: 'Documentation',
-        href: 'https://laravel.com/docs/starter-kits#react',
-        icon: BookOpen,
-    },
+   {
+        title: 'Usuarios',
+        href: '/users',
+        icon: Users,
+    }
 ];
 
 export function AppSidebar() {

@@ -1,12 +1,12 @@
-import { Icon } from '@/components/icon';
 import {
     SidebarGroup,
     SidebarGroupContent,
+    SidebarGroupLabel,
     SidebarMenu,
     SidebarMenuButton,
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
-import { resolveUrl } from '@/lib/utils';
+import { Link } from '@inertiajs/react';
 import { type NavItem } from '@/types';
 import { type ComponentPropsWithoutRef } from 'react';
 
@@ -23,6 +23,8 @@ export function NavFooter({
             className={`group-data-[collapsible=icon]:p-0 ${className || ''}`}
         >
             <SidebarGroupContent>
+                <SidebarGroupLabel>Administrar</SidebarGroupLabel>
+
                 <SidebarMenu>
                     {items.map((item) => (
                         <SidebarMenuItem key={item.title}>
@@ -30,19 +32,10 @@ export function NavFooter({
                                 asChild
                                 className="text-neutral-600 hover:text-neutral-800 dark:text-neutral-300 dark:hover:text-neutral-100"
                             >
-                                <a
-                                    href={resolveUrl(item.href)}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                >
-                                    {item.icon && (
-                                        <Icon
-                                            iconNode={item.icon}
-                                            className="h-5 w-5"
-                                        />
-                                    )}
+                                <Link href={item.href} prefetch>
+                                    {item.icon && <item.icon />}
                                     <span>{item.title}</span>
-                                </a>
+                                </Link>
                             </SidebarMenuButton>
                         </SidebarMenuItem>
                     ))}
