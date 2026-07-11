@@ -13,17 +13,30 @@ class DashboardController extends Controller
 {
     public function __invoke()
     {
-        $stats = Cache::remember('dashboard.stats', 60, fn () => [
-            'active_projects'  => Project::where('status', 'active')->count(),
-            'total_clients'    => Client::where('active', true)->count(),
-            'pending_tasks'    => Task::whereIn('status', ['backlog', 'in_progress'])->count(),
-            'overdue_tasks'    => Task::overdue()->count(),
-            'pending_quotes'   => Quote::whereIn('status', ['draft', 'sent'])->count(),
-            'approved_quotes'  => Quote::where('status', 'approved')->count(),
+        $user      = auth()->user();
+        $isDev     = $user->isDeveloper();
+
+        // Developer scope: solo proyectos donde es miembro
+        $projectScope = fn ($q) => $isDev
+            ? $q->whereHas('members', fn ($m) => $m->where('user_id', $user->id))
+            : $q;
+
+        // Task scope: developer solo ve tareas asignadas a él
+        $taskScope = fn ($q) => $isDev
+            ? $q->where('assigned_to', $user->id)
+            : $q;
+
+        $stats = Cache::remember("dashboard.stats.{$user->id}", 60, fn () => [
+            'active_projects'  => Project::where('status', 'active')->tap($projectScope)->count(),
+            'total_clients'    => $isDev ? 0 : Client::where('active', true)->count(),
+            'pending_quotes'   => $isDev ? 0 : Quote::whereIn('status', ['draft', 'sent'])->count(),
+            'overdue_tasks'    => Task::overdue()->tap($taskScope)->count(),
+            'approved_quotes'  => $isDev ? 0 : Quote::where('status', 'approved')->count(),
         ]);
 
         $activeProjects = Project::with('client')
             ->where('status', 'active')
+            ->tap($projectScope)
             ->orderByDesc('updated_at')
             ->take(5)
             ->get()
@@ -37,6 +50,7 @@ class DashboardController extends Controller
 
         $overdueTasks = Task::with('project')
             ->overdue()
+            ->tap($taskScope)
             ->orderBy('due_date')
             ->take(5)
             ->get()
@@ -51,8 +65,7 @@ class DashboardController extends Controller
                 'project_name'   => $t->project->name,
             ]);
 
-        // Cotizaciones recientes pendientes de acción
-        $pendingQuotes = Quote::with('client')
+        $pendingQuotes = $isDev ? collect() : Quote::with('client')
             ->whereIn('status', ['draft', 'sent'])
             ->latest()
             ->take(5)
@@ -69,7 +82,7 @@ class DashboardController extends Controller
                 'valid_until'     => $q->valid_until?->format('d/m/Y'),
             ]);
 
-        $recentClients = Client::latest()->take(5)->get()
+        $recentClients = $isDev ? collect() : Client::latest()->take(5)->get()
             ->map(fn ($c) => [
                 'id'             => $c->id,
                 'name'           => $c->name,

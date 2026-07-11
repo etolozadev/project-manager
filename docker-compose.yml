@@ -9,6 +9,12 @@ services:
     volumes:
       - .:/var/www
       - ./docker/php/php.ini:/usr/local/etc/php/conf.d/custom.ini
+      # vendor/ en volumen Docker nativo — filesystem Linux puro,
+      # sin overhead del bind mount Windows/HyperV.
+      # Resultado: PHP carga las ~8000 dependencias sin lentitud.
+      - vendor_data:/var/www/vendor
+      # node_modules también beneficia del volumen nativo
+      - node_modules_data:/var/www/node_modules
     networks:
       - project-manager-v2-network
     depends_on:
@@ -71,4 +77,9 @@ networks:
 
 volumes:
   project-manager-v2-db:
+    driver: local
+  # Volúmenes para vendor y node_modules — filesystem Linux nativo
+  vendor_data:
+    driver: local
+  node_modules_data:
     driver: local

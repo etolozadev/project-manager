@@ -8,6 +8,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
+use Inertia\Inertia;
 
 class AuthenticatedSessionController extends Controller
 {
@@ -33,8 +34,13 @@ class AuthenticatedSessionController extends Controller
 
     /**
      * Destroy an authenticated session.
+     *
+     * Usa Inertia::location() en lugar de redirect() para forzar una
+     * redirección completa del navegador. Si se usa redirect() normal,
+     * Inertia intercepta la respuesta y muestra la página de login
+     * (Blade HTML) como un modal de error sobre el dashboard.
      */
-    public function destroy(Request $request): RedirectResponse
+    public function destroy(Request $request)
     {
         Auth::guard('web')->logout();
 
@@ -42,6 +48,8 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerateToken();
 
-        return redirect('/');
+        // location() envía header X-Inertia-Location → el cliente hace
+        // window.location.href en lugar de fetch XHR, evitando el conflicto.
+        return Inertia::location('/');
     }
 }

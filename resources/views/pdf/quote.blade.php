@@ -434,7 +434,7 @@
     {{-- ─── FOOTER ─────────────────────────────────────────────────── --}}
     <div class="footer">
         <div class="footer-left">
-            Generado el {{ now()->locale('es')->isoFormat('D [de] MMMM [de] YYYY, HH:mm') }} hrs
+            Generado el {{ now()->timezone('America/Santiago')->locale('es')->isoFormat('D [de] MMMM [de] YYYY, HH:mm') }} hrs
         </div>
         <div class="footer-right">
             @if($quote->valid_until && $quote->valid_until->isPast())

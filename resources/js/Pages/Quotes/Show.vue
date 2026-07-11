@@ -252,7 +252,7 @@ const rejecting  = ref(false);
 const duplicating = ref(false);
 
 function formatAmount(amount) {
-  if (props.quote.currency === 'USD') return 'USD ' + (amount / 100).toFixed(2);
+  if (props.quote.currency === 'USD') return 'USD ' + Number(amount).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
   return '$' + new Intl.NumberFormat('es-CL').format(amount);
 }
 

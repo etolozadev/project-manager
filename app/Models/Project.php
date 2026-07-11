@@ -54,6 +54,54 @@ class Project extends Model
         return $this->hasMany(Task::class);
     }
 
+    public function servers(): HasMany
+    {
+        return $this->hasMany(Server::class);
+    }
+
+    public function members(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'project_members');
+    }
+
+    public function payments(): HasMany
+    {
+        return $this->hasMany(Payment::class)->orderByDesc('payment_date');
+    }
+
+    public function expenses(): HasMany
+    {
+        return $this->hasMany(Expense::class)->orderByDesc('expense_date');
+    }
+
+    // ── Helpers financieros ─────────────────────────────────────
+
+    public function getTotalPaidAttribute(): int
+    {
+        return $this->payments()->sum('amount');
+    }
+
+    public function getTotalExpensesAttribute(): int
+    {
+        return $this->expenses()->sum('amount');
+    }
+
+    public function getPendingPaymentAttribute(): int
+    {
+        return max(0, $this->budget_amount - $this->total_paid);
+    }
+
+    public function getNetProfitAttribute(): int
+    {
+        return $this->total_paid - $this->total_expenses;
+    }
+
+    public function getPaymentPercentageAttribute(): int
+    {
+        if ($this->budget_amount === 0) return 0;
+        return (int) min(100, round(($this->total_paid / $this->budget_amount) * 100));
+    }
+
     // -------------------------------------------------------
     // Accessors
     // -------------------------------------------------------
@@ -86,7 +134,7 @@ class Project extends Model
     {
         return match ($this->currency) {
             'CLP' => '$' . number_format($this->budget_amount, 0, ',', '.'),
-            'USD' => 'USD ' . number_format($this->budget_amount / 100, 2, '.', ','),
+            'USD' => 'USD ' . number_format($this->budget_amount, 2, '.', ','),
             default => $this->budget_amount,
         };
     }

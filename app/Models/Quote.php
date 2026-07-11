@@ -108,7 +108,7 @@ class Quote extends Model
     private function formatAmount(int $amount): string
     {
         return match ($this->currency) {
-            'USD'   => 'USD ' . number_format($amount / 100, 2, '.', ','),
+            'USD'   => 'USD ' . number_format($amount, 2, '.', ','),
             default => '$' . number_format($amount, 0, ',', '.'),
         };
     }

@@ -38,20 +38,22 @@ RUN curl -fsSL https://deb.nodesource.com/setup_22.x | bash - \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
+# PHP-FPM pool config (workers estáticos, sin cold starts)
+COPY docker/php/www.conf /usr/local/etc/php-fpm.d/www.conf
+
 # Set working directory
 WORKDIR /var/www
 
-# Create system user to run Composer and Artisan Commands
+# Create system user
 RUN groupadd -g 1000 www && useradd -u 1000 -ms /bin/bash -g www www
 
-# Copy existing application directory permissions
+# Copy application
 COPY --chown=www:www . .
 
 # Startup script
 COPY --chown=www:www docker/php/start.sh /usr/local/bin/start.sh
 RUN chmod +x /usr/local/bin/start.sh
 
-# Change current user to www
 USER www
 
 EXPOSE 9000

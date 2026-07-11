@@ -24,6 +24,9 @@ class DatabaseSeeder extends Seeder
             ClientSeeder::class,
             ProjectSeeder::class,
             QuoteSeeder::class,
+            FinanceSeeder::class,
+            ServerSeeder::class,
+            UserSeeder::class,
         ]);
     }
 }

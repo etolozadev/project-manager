@@ -204,7 +204,7 @@ const total = computed(() => subtotal.value + taxAmount.value);
 
 function formatAmount(amount) {
   if (form.currency === 'USD') {
-    return 'USD ' + (amount / 100).toFixed(2);
+    return 'USD ' + Number(amount).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
   }
   return '$' + new Intl.NumberFormat('es-CL').format(amount);
 }
