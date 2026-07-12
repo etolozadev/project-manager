@@ -51,8 +51,11 @@ COPY --from=frontend /app/public/build ./public/build
 # Instalar dependencias PHP (solo producción)
 RUN composer install --no-dev --optimize-autoloader --no-interaction
 
-# Permisos de storage
-RUN chmod -R 775 storage bootstrap/cache
+# Crear directorios de storage necesarios y permisos
+RUN mkdir -p storage/framework/views \
+              storage/framework/cache/data \
+              storage/framework/sessions \
+    && chmod -R 775 storage bootstrap/cache
 
 # Script de arranque
 COPY docker/render-start.sh /start.sh
