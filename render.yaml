@@ -1,0 +1,31 @@
+services:
+  - type: web
+    name: project-manager-v2
+    runtime: docker
+    plan: free
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: false
+      # Generá la clave con: php artisan key:generate --show
+      - key: APP_KEY
+        sync: false
+      # Se actualiza automáticamente con tu URL de Render al hacer el deploy
+      - key: APP_URL
+        sync: false
+      - key: DB_CONNECTION
+        value: pgsql
+      # Pegá el connection string de Neon (postgresql://user:pass@host/db?sslmode=require)
+      - key: DB_URL
+        sync: false
+      - key: SESSION_DRIVER
+        value: database
+      - key: CACHE_STORE
+        value: database
+      - key: QUEUE_CONNECTION
+        value: database
+      - key: LOG_CHANNEL
+        value: stderr
+      - key: LOG_LEVEL
+        value: error
