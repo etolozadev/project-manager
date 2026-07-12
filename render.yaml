@@ -16,9 +16,19 @@ services:
         sync: false
       - key: DB_CONNECTION
         value: pgsql
-      # Pegá el connection string de Neon (postgresql://user:pass@host/db?sslmode=require)
-      - key: DB_URL
+      # Extraé estos valores del connection string de Neon
+      - key: DB_HOST
         sync: false
+      - key: DB_PORT
+        value: "5432"
+      - key: DB_DATABASE
+        sync: false
+      - key: DB_USERNAME
+        sync: false
+      - key: DB_PASSWORD
+        sync: false
+      - key: DB_SSLMODE
+        value: require
       - key: SESSION_DRIVER
         value: database
       - key: CACHE_STORE
