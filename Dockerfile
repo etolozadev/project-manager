@@ -14,7 +14,8 @@ FROM php:8.3-cli-alpine
 RUN apk add --no-cache \
     git curl zip unzip \
     libpng-dev libzip-dev icu-dev oniguruma-dev \
-    freetype-dev libjpeg-turbo-dev
+    freetype-dev libjpeg-turbo-dev \
+    postgresql-dev
 
 # Extensiones PHP
 RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
