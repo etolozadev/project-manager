@@ -49,7 +49,8 @@ COPY . .
 COPY --from=frontend /app/public/build ./public/build
 
 # Instalar dependencias PHP (solo producción)
-RUN composer install --no-dev --optimize-autoloader --no-interaction
+RUN composer update fakerphp/faker --no-interaction --no-scripts \
+    && composer install --no-dev --optimize-autoloader --no-interaction
 
 # Crear directorios de storage necesarios y permisos
 RUN mkdir -p storage/framework/views \
