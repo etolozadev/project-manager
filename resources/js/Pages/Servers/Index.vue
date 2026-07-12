@@ -22,8 +22,8 @@
     </div>
 
     <!-- Filtros -->
-    <div class="mb-5 flex flex-wrap gap-3">
-      <div class="flex flex-1 items-center gap-2 rounded-lg border border-gray-300 bg-white px-3 py-2 min-w-48">
+    <div class="mb-6 flex flex-wrap items-center gap-2 rounded-xl bg-white px-4 py-3 shadow-sm ring-1 ring-gray-100">
+      <div class="flex flex-1 items-center gap-2.5 rounded-lg bg-gray-50 px-3 py-2 min-w-52 ring-1 ring-gray-200 transition-all focus-within:bg-white focus-within:ring-indigo-400 focus-within:shadow-sm">
         <svg class="h-4 w-4 shrink-0 text-gray-400" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 15.803 7.5 7.5 0 0016.803 15.803z"/>
         </svg>
@@ -31,16 +31,17 @@
                placeholder="Buscar por nombre, dominio, IP o proveedor..."
                class="w-full bg-transparent text-sm text-gray-900 placeholder-gray-400 outline-none"/>
       </div>
+      <div class="hidden h-5 w-px bg-gray-200 sm:block"></div>
       <select v-model="filters.status" @change="applyFilters"
-              class="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+              class="cursor-pointer rounded-lg bg-gray-50 px-3 py-2 text-sm text-gray-600 ring-1 ring-gray-200 transition-all hover:ring-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:bg-white">
         <option value="">Todos los estados</option>
         <option value="active">Activo</option>
         <option value="inactive">Inactivo</option>
         <option value="expired">Vencido</option>
       </select>
       <button v-if="filters.search || filters.status" @click="clearFilters"
-              class="flex items-center gap-1 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 transition-colors">
-        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+              class="flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium text-gray-400 transition-colors hover:bg-red-50 hover:text-red-500">
+        <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
         </svg>
         Limpiar
