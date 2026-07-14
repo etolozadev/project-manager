@@ -59,14 +59,14 @@ class FinanceController extends Controller
             ->values();
 
         // ── Ingresos mensuales (últimos 6 meses) ─────────────────
-        $monthlyIncome = Payment::select(
-                DB::raw('YEAR(payment_date) as year'),
-                DB::raw('MONTH(payment_date) as month'),
-                DB::raw('SUM(amount) as total')
+        $monthlyIncome = Payment::selectRaw(
+                'EXTRACT(YEAR FROM payment_date)::int  AS year,
+                 EXTRACT(MONTH FROM payment_date)::int AS month,
+                 SUM(amount) AS total'
             )
             ->where('payment_date', '>=', now()->subMonths(5)->startOfMonth())
-            ->groupBy('year', 'month')
-            ->orderBy('year')->orderBy('month')
+            ->groupByRaw('EXTRACT(YEAR FROM payment_date), EXTRACT(MONTH FROM payment_date)')
+            ->orderByRaw('EXTRACT(YEAR FROM payment_date), EXTRACT(MONTH FROM payment_date)')
             ->get()
             ->map(fn ($r) => [
                 'label' => now()->setYear($r->year)->setMonth($r->month)->locale('es')->isoFormat('MMM'),
