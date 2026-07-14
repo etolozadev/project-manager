@@ -16,12 +16,18 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // Limpiar tablas en orden inverso de dependencias (CASCADE maneja las FK en PostgreSQL)
-        DB::statement('TRUNCATE TABLE
-            servers, expenses, payments, quote_items, quotes,
-            tasks, projects, clients, users
-            RESTART IDENTITY CASCADE'
-        );
+        // Limpiar tablas respetando la sintaxis de cada motor
+        $tables = ['servers', 'expenses', 'payments', 'quote_items', 'quotes', 'tasks', 'projects', 'clients', 'users'];
+
+        if (DB::getDriverName() === 'pgsql') {
+            DB::statement('TRUNCATE TABLE ' . implode(', ', $tables) . ' RESTART IDENTITY CASCADE');
+        } else {
+            DB::statement('SET FOREIGN_KEY_CHECKS=0');
+            foreach ($tables as $table) {
+                DB::table($table)->truncate();
+            }
+            DB::statement('SET FOREIGN_KEY_CHECKS=1');
+        }
 
         User::factory()->create([
             'name'  => 'Esteban Toloza',
