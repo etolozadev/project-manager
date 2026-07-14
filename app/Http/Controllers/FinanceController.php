@@ -62,8 +62,8 @@ class FinanceController extends Controller
 
         // ── Ingresos mensuales (últimos 6 meses) ─────────────────
         $monthlyIncome = Payment::selectRaw(
-                'EXTRACT(YEAR FROM payment_date)::int  AS year,
-                 EXTRACT(MONTH FROM payment_date)::int AS month,
+                'EXTRACT(YEAR FROM payment_date)  AS year,
+                 EXTRACT(MONTH FROM payment_date) AS month,
                  SUM(amount) AS total'
             )
             ->where('payment_date', '>=', now()->subMonths(5)->startOfMonth())
