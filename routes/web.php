@@ -15,6 +15,10 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', fn () => redirect()->route('dashboard'));
 
+Route::get('/ping', function () {
+    return response()->json(['status' => 'ok']);
+});
+
 Route::middleware(['auth', 'verified'])->group(function () {
 
     // Dashboard
