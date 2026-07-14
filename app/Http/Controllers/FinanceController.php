@@ -15,26 +15,28 @@ class FinanceController extends Controller
         $currentYear  = now()->year;
         $currentMonth = now()->month;
 
+        // Rangos de fecha (index-friendly con whereBetween, evita función YEAR/MONTH que rompe índices)
+        $yearStart  = now()->startOfYear();
+        $yearEnd    = now()->endOfYear();
+        $monthStart = now()->startOfMonth();
+        $monthEnd   = now()->endOfMonth();
+
         // ── Resumen anual ────────────────────────────────────────
-        $annualIncome   = Payment::whereYear('payment_date', $currentYear)->sum('amount');
-        $annualExpenses = Expense::whereYear('expense_date', $currentYear)->sum('amount');
+        $annualIncome   = Payment::whereBetween('payment_date', [$yearStart, $yearEnd])->sum('amount');
+        $annualExpenses = Expense::whereBetween('expense_date', [$yearStart, $yearEnd])->sum('amount');
 
         // ── Resumen del mes actual ───────────────────────────────
-        $monthIncome = Payment::whereYear('payment_date', $currentYear)
-            ->whereMonth('payment_date', $currentMonth)
-            ->sum('amount');
+        $monthIncome   = Payment::whereBetween('payment_date', [$monthStart, $monthEnd])->sum('amount');
+        $monthExpenses = Expense::whereBetween('expense_date', [$monthStart, $monthEnd])->sum('amount');
 
-        $monthExpenses = Expense::whereYear('expense_date', $currentYear)
-            ->whereMonth('expense_date', $currentMonth)
-            ->sum('amount');
-
-        // ── Por cobrar (proyectos activos) ───────────────────────
+        // ── Por cobrar (proyectos activos) — withSum evita N+1 ──
         $pendingProjects = Project::with('client')
+            ->withSum('payments', 'amount')
             ->whereIn('status', ['active', 'paused', 'draft'])
             ->where('budget_amount', '>', 0)
             ->get()
             ->map(function ($p) {
-                $paid    = $p->payments()->sum('amount');
+                $paid    = (int) ($p->payments_sum_amount ?? 0);
                 $pending = max(0, $p->budget_amount - $paid);
                 return [
                     'id'              => $p->id,
@@ -76,7 +78,7 @@ class FinanceController extends Controller
 
         // ── Gastos por categoría (año actual) ────────────────────
         $expensesByCategory = Expense::select('category', DB::raw('SUM(amount) as total'))
-            ->whereYear('expense_date', $currentYear)
+            ->whereBetween('expense_date', [$yearStart, $yearEnd])
             ->groupBy('category')
             ->get()
             ->map(fn ($r) => [

@@ -26,7 +26,7 @@ class DashboardController extends Controller
             ? $q->where('assigned_to', $user->id)
             : $q;
 
-        $stats = Cache::remember("dashboard.stats.{$user->id}", 60, fn () => [
+        $stats = Cache::remember("dashboard.stats.{$user->id}", now()->addMinutes(5), fn () => [
             'active_projects'  => Project::where('status', 'active')->tap($projectScope)->count(),
             'total_clients'    => $isDev ? 0 : Client::where('active', true)->count(),
             'pending_quotes'   => $isDev ? 0 : Quote::whereIn('status', ['draft', 'sent'])->count(),

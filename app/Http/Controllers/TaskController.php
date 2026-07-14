@@ -70,6 +70,7 @@ class TaskController extends Controller
         ]);
 
         $task->update(['status' => $request->status]);
+        $task->load('project');
 
         return response()->json([
             'success'  => true,

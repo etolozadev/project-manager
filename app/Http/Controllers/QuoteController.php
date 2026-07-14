@@ -25,15 +25,24 @@ class QuoteController extends Controller
 
         $clients = Client::active()->orderBy('name')->get(['id', 'name']);
 
+        // Una sola query con agregación condicional en lugar de 4 COUNT separados
+        $summary = Quote::selectRaw("
+            COUNT(*) AS total,
+            SUM(CASE WHEN status = 'draft'    THEN 1 ELSE 0 END) AS draft,
+            SUM(CASE WHEN status = 'sent'     THEN 1 ELSE 0 END) AS sent,
+            SUM(CASE WHEN status = 'approved' THEN 1 ELSE 0 END) AS approved,
+            SUM(CASE WHEN status = 'rejected' THEN 1 ELSE 0 END) AS rejected
+        ")->first();
+
         return Inertia::render('Quotes/Index', [
             'quotes'  => $quotes,
             'clients' => $clients,
             'filters' => request()->only(['search', 'status', 'client_id']),
             'summary' => [
-                'total'    => Quote::count(),
-                'draft'    => Quote::where('status', 'draft')->count(),
-                'sent'     => Quote::where('status', 'sent')->count(),
-                'approved' => Quote::where('status', 'approved')->count(),
+                'total'    => (int) $summary->total,
+                'draft'    => (int) $summary->draft,
+                'sent'     => (int) $summary->sent,
+                'approved' => (int) $summary->approved,
             ],
         ]);
     }
@@ -102,11 +111,17 @@ class QuoteController extends Controller
 
         $quote->update($request->safe()->except('items'));
 
-        // Reemplazar items: eliminar los actuales y recrear
+        // Reemplazar items: eliminar los actuales y recrear en una sola operación bulk
         $quote->items()->delete();
-        foreach ($request->items as $i => $itemData) {
-            $quote->items()->create([...$itemData, 'order' => $i]);
-        }
+        $quote->items()->createMany(
+            collect($request->items)->map(fn ($item, $i) => [
+                'description' => $item['description'],
+                'detail'      => $item['detail'] ?? null,
+                'quantity'    => $item['quantity'],
+                'unit_price'  => $item['unit_price'],
+                'order'       => $i,
+            ])->all()
+        );
 
         $quote->recalculateTotals();
 
@@ -169,15 +184,15 @@ class QuoteController extends Controller
             'terms'        => $quote->terms,
         ]);
 
-        foreach ($quote->items as $item) {
-            $newQuote->items()->create([
+        $newQuote->items()->createMany(
+            $quote->items->map(fn ($item) => [
                 'description' => $item->description,
                 'detail'      => $item->detail,
                 'quantity'    => $item->quantity,
                 'unit_price'  => $item->unit_price,
                 'order'       => $item->order,
-            ]);
-        }
+            ])->all()
+        );
 
         $newQuote->recalculateTotals();
 
