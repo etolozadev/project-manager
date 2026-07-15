@@ -71,9 +71,9 @@ class FinanceController extends Controller
             ->orderByRaw('EXTRACT(YEAR FROM payment_date), EXTRACT(MONTH FROM payment_date)')
             ->get()
             ->map(fn ($r) => [
-                'label' => now()->setYear($r->year)->setMonth($r->month)->locale('es')->isoFormat('MMM'),
-                'total' => $r->total,
-                'formatted' => '$' . number_format($r->total, 0, ',', '.'),
+                'label'     => now()->setYear((int) $r->year)->setMonth((int) $r->month)->locale('es')->isoFormat('MMM'),
+                'total'     => (int) ($r->total ?? 0),
+                'formatted' => '$' . number_format((int) ($r->total ?? 0), 0, ',', '.'),
             ]);
 
         // ── Gastos por categoría (año actual) ────────────────────
@@ -97,8 +97,8 @@ class FinanceController extends Controller
             ->map(fn ($p) => [
                 'id'               => $p->id,
                 'project_id'       => $p->project_id,
-                'project_name'     => $p->project->name,
-                'client_name'      => $p->project->client->name,
+                'project_name'     => $p->project?->name ?? '—',
+                'client_name'      => $p->project?->client?->name ?? '—',
                 'formatted_amount' => $p->formatted_amount,
                 'method_name'      => $p->method_name,
                 'method_color'     => $p->method_color,
@@ -113,7 +113,7 @@ class FinanceController extends Controller
             ->map(fn ($e) => [
                 'id'               => $e->id,
                 'project_id'       => $e->project_id,
-                'project_name'     => $e->project->name,
+                'project_name'     => $e->project?->name ?? '—',
                 'description'      => $e->description,
                 'category_name'    => $e->category_name,
                 'category_color'   => $e->category_color,
