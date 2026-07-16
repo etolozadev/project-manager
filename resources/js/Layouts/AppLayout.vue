@@ -139,10 +139,28 @@
       </Transition>
 
       <!-- Contenido de la página -->
-      <main class="flex-1">
+      <main class="flex-1 relative">
         <div class="px-4 sm:px-6 py-6">
           <slot />
         </div>
+
+        <!-- Skeleton overlay — cubre el contenido durante la navegación
+             sin desmontar el slot (Inertia necesita el componente montado) -->
+        <Transition
+          enter-active-class="transition-opacity duration-150 ease-out"
+          enter-from-class="opacity-0"
+          enter-to-class="opacity-100"
+          leave-active-class="transition-opacity duration-200 ease-in"
+          leave-from-class="opacity-100"
+          leave-to-class="opacity-0"
+        >
+          <div
+            v-if="navigating"
+            class="absolute inset-0 z-10 bg-gray-50 px-4 sm:px-6 py-6"
+          >
+            <PageSkeleton />
+          </div>
+        </Transition>
       </main>
     </div>
   </div>
@@ -150,8 +168,9 @@
 
 <script setup>
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
-import { Link, usePage } from '@inertiajs/vue3';
+import { Link, usePage, router } from '@inertiajs/vue3';
 import SidebarContent from './SidebarContent.vue';
+import PageSkeleton from '@/Components/PageSkeleton.vue';
 
 defineProps({
   title:       String,
@@ -163,6 +182,7 @@ const sidebarOpen  = ref(false);
 const userMenuOpen = ref(false);
 const userMenuRef  = ref(null);
 const auth         = computed(() => page.props.auth);
+const navigating   = ref(false);
 
 // Flash
 const flashMessage = ref(null);
@@ -189,9 +209,16 @@ function onClickOutside(e) {
     userMenuOpen.value = false;
   }
 }
-onMounted(() => document.addEventListener('mousedown', onClickOutside));
+let removeStart, removeFinish;
+onMounted(() => {
+  document.addEventListener('mousedown', onClickOutside);
+  removeStart  = router.on('start',  () => { navigating.value = true; });
+  removeFinish = router.on('finish', () => { navigating.value = false; });
+});
 onUnmounted(() => {
   document.removeEventListener('mousedown', onClickOutside);
   document.body.style.overflow = '';
+  removeStart?.();
+  removeFinish?.();
 });
 </script>
